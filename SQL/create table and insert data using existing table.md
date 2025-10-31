@@ -13,7 +13,7 @@ FROM source_table
 WHERE condition;
 ```
 
-If you have a table called employees and want to make a full copy:
+If you have a table called employees and want to make a full copy (new table and data):
 ```
 SELECT *
 INTO employees_backup
@@ -22,7 +22,7 @@ FROM employees;
 
 
 
-insert one row:
+Insert one row:
 ```
 INSERT INTO table_name (column1, column2, column3)
 VALUES (value1, value2, value3);
