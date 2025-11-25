@@ -22,3 +22,19 @@ JOIN sys.tables t ON s.schema_id = t.schema_id
 JOIN sys.columns c ON t.object_id = c.object_id
 WHERE c.name LIKE '%YourColumnName%';
 ```
+
+# search in procedures views
+
+```sql
+  SELECT sm.object_id,
+       o.type_desc,
+       s.name AS schema_name,
+       o.name AS object_name,
+       sm.definition
+FROM sys.sql_modules sm
+JOIN sys.objects o ON sm.object_id = o.object_id
+JOIN sys.schemas s ON o.schema_id = s.schema_id
+WHERE sm.definition LIKE '%vw_Remontas%'
+
+```
+  AND o.type IN ('P', 'V'); -- P = Procedure, V = View
