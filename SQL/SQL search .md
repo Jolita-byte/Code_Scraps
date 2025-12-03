@@ -35,6 +35,24 @@ FROM sys.sql_modules sm
 JOIN sys.objects o ON sm.object_id = o.object_id
 JOIN sys.schemas s ON o.schema_id = s.schema_id
 WHERE sm.definition LIKE '%vw_Remontas%'
+```
+
+# get list of columns
+
+```sql
+SELECT
+    c.name AS ColumnName,
+    t.name AS DataType,
+    c.is_nullable
+FROM
+    sys.views v
+JOIN
+    sys.columns c ON v.object_id = c.object_id
+JOIN
+    sys.types t ON c.user_type_id = t.user_type_id
+WHERE
+    v.name = 'YourViewName';
+```
 
 ```
   AND o.type IN ('P', 'V'); -- P = Procedure, V = View
