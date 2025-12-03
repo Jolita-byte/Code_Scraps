@@ -35,6 +35,7 @@ FROM sys.sql_modules sm
 JOIN sys.objects o ON sm.object_id = o.object_id
 JOIN sys.schemas s ON o.schema_id = s.schema_id
 WHERE sm.definition LIKE '%vw_Remontas%'
+AND o.type IN ('P', 'V'); -- P = Procedure, V = View
 ```
 
 # get list of columns
@@ -54,5 +55,3 @@ WHERE
     v.name = 'YourViewName';
 ```
 
-```
-  AND o.type IN ('P', 'V'); -- P = Procedure, V = View
