@@ -320,7 +320,80 @@ Would you like me to give you the **exact stored procedure** you can deploy in S
 It would handle the archive, partition maintenance, and refresh in one go.
 
 
+# Partitioning Gemini
+## Prompt: my problem is to delete data from table, to update them with new ones. how to do this with partitions
+I understand now. You are looking for a **"Sling Load"** or **"Partition Switching"** strategy. Instead of deleting millions of rows row-by-row (which is slow and locks the table), you want to drop an entire "bucket" of data (like one month) and swap in the new data instantly.
 
+To make this possible in T-SQL, you don't just use the `OVER(PARTITION BY...)` function; you must physically set up the table to be **Partitioned**.
+
+### Step 1: Create a Partition Function
+
+This defines the "boundaries" (e.g., the dates) that separate your data buckets.
+
+```sql
+CREATE PARTITION FUNCTION MonthRangeFunction (DATE)
+AS RANGE RIGHT FOR VALUES ('2026-01-01', '2026-02-01', '2026-03-01');
+
+```
+
+### Step 2: Create a Partition Scheme
+
+This maps those "buckets" to the physical storage (filegroups) in your database.
+
+```sql
+CREATE PARTITION SCHEME MonthRangeScheme
+AS PARTITION MonthRangeFunction
+ALL TO ([PRIMARY]);
+
+```
+
+### Step 3: Create/Modify the Table to use the Scheme
+
+Your table must be built on this scheme to allow for fast "deletes."
+
+```sql
+CREATE TABLE Finance_Sink (
+    full_name NVARCHAR(255) COLLATE Lithuanian_CI_AS, -- Unicode for Kęstutis
+    pasikrovimo_data DATE,
+    Pajamos DECIMAL(18,2)
+) ON MonthRangeScheme (pasikrovimo_data);
+
+```
+
+---
+
+### How to "Delete and Update" with Partitions
+
+Once the table is set up this way, you can "clear" a specific month almost instantly without a `DELETE` command:
+
+#### 1. Truncate a specific Partition
+
+If you just received new data for **January 2026** and want to wipe the old January data:
+
+```sql
+-- Assuming January is partition 2
+TRUNCATE TABLE Finance_Sink WITH (PARTITIONS (2));
+
+```
+
+* **Why this is better**: It doesn't log every row deletion, so it is nearly instant and won't crash your transaction log.
+
+#### 2. The "Switch" Method (Advanced)
+
+If you want **zero downtime**, you load your new data into a "Staging" table first, then swap them:
+
+```sql
+ALTER TABLE Staging_Table SWITCH PARTITION 1 TO Finance_Sink PARTITION 2;
+
+```
+
+### Summary of Benefits for your Project
+
+* **Efficiency**: Deleting one month of data for all companies (like "Kęstutis Arlauskas") takes milliseconds regardless of the number of rows.
+* **Maintenance**: You can rebuild indexes on just the newest partition instead of the whole 10-year history.
+* **Data Integrity**: By truncating the partition before the "sink," you guarantee there are no duplicates for that specific time period in your Power BI Matrix.
+
+**Would you like the SQL script to help you identify which partition number corresponds to which month in your current table?**
 
 
 
