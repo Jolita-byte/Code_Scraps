@@ -395,7 +395,72 @@ ALTER TABLE Staging_Table SWITCH PARTITION 1 TO Finance_Sink PARTITION 2;
 
 **Would you like the SQL script to help you identify which partition number corresponds to which month in your current table?**
 
+# Dynamic partitioning
 
+Yes, you can absolutely make partitioning dynamic. T-SQL does not have an "auto-partition" setting that creates new months by itself, but you can use a **Stored Procedure** to automate the process.
+
+To handle new months as they appear, you use two specific commands: `SPLIT` (to add a new month) and `MERGE` (to remove or archive old months).
+
+---
+
+### 1. How to "Split" a Partition for a New Month
+
+When a new month starts (e.g., February 2026), you need to "split" the last partition to create a new boundary.
+
+```sql
+-- 1. Check your existing Scheme to see where the data goes
+-- 2. Use ALTER PARTITION FUNCTION to add the new date
+ALTER PARTITION FUNCTION MonthRangeFunction() 
+SPLIT RANGE ('2026-02-01');
+
+```
+
+> **Note:** For this to work, you must have an empty "Next Used" filegroup in your Partition Scheme.
+
+### 2. Automating it with a Stored Procedure
+
+Instead of doing this manually every month, you can create a script that checks if a partition for the "Next Month" exists and creates it if it doesn't.
+
+```sql
+CREATE PROCEDURE dbo.sp_AutomatePartitions
+AS
+BEGIN
+    DECLARE @NextMonth DATE = DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1);
+    SET @NextMonth = DATEADD(MONTH, 1, @NextMonth); -- Target the start of next month
+
+    -- Only split if the boundary doesn't exist yet
+    IF NOT EXISTS (SELECT 1 FROM sys.partition_range_values rv 
+                   JOIN sys.partition_functions pf ON rv.function_id = pf.function_id
+                   WHERE pf.name = 'MonthRangeFunction' AND rv.value = @NextMonth)
+    BEGIN
+        -- Ensure the scheme knows where to put the new data
+        ALTER PARTITION SCHEME MonthRangeScheme NEXT USED [PRIMARY];
+        
+        -- Create the new boundary
+        ALTER PARTITION FUNCTION MonthRangeFunction() SPLIT RANGE (@NextMonth);
+    END
+END
+
+```
+
+---
+
+### 3. Best Practices for your "Sink" Workflow
+
+* **Pre-Creation:** Always create partitions for 6–12 months into the future. This prevents your "Sink" from failing if the automated script hasn't run yet.
+* **Unicode Names:** When the partition logic runs, it doesn't affect the data itself, so your Lithuanian names like **"Kęstutis"** will remain safe as long as the underlying table is `NVARCHAR`.
+* **Truncate Before Update:** Now that it's dynamic, your update logic becomes:
+1. Identify the partition number for the month you are uploading.
+2. `TRUNCATE TABLE YourTable WITH (PARTITIONS (X))`.
+3. Insert new data.
+
+
+
+### 4. Monitoring your Partitions
+
+You can find these dynamic changes in the same place I mentioned before: **Storage > Partition Functions**. If you run the automation, you will see the list of "Boundary Values" grow there automatically.
+
+**Would you like me to help you write the logic to find the specific Partition Number for a given date so your "Delete/Update" script knows exactly which one to truncate?**
 
 # How to find existing partitions <a name="find_partitions"></a>
 
