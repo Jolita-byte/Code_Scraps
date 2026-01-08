@@ -1,5 +1,13 @@
 NEBANDYTA
+TODO: Reikia sutvarkyti turinį
+ [TOC]
+ 
+# Table of Contents
+1. [Partitioning Chat GBT](#Partitioning_Chat_GBT)
+2. [How to find existing partitions](#find_partitions)
 
+
+# Partitioning Chat GBT <a name="Partitioning_Chat_GBT"></a>
 ## Prompt: if i have past 30 days data, and i want update it, i want old 30 days data to be deleted, and uloaded new. while using switch out for older than 3 months data
 
 Perfect — you’re describing a **very common hybrid pattern** for managing large, time-based tables in SQL Server (and Azure SQL).
@@ -310,3 +318,69 @@ This can be scheduled **daily**.
 
 Would you like me to give you the **exact stored procedure** you can deploy in SQL Server (or Azure SQL DB) to do this entire process automatically?
 It would handle the archive, partition maintenance, and refresh in one go.
+
+
+
+
+
+
+# How to find existing partitions <a name="find_partitions"></a>
+
+## 1. Finding them in SSMS (Object Explorer)
+To see your created partitions, follow this path in the Object Explorer panel on the left:
+
+Open your Database.
+
+Expand the Storage folder.
+
+Inside Storage, you will find two specific folders:
+
+Partition Functions: Contains the logic defining the boundaries (e.g., your dates).
+
+Partition Schemes: Contains the mapping of those functions to filegroups.
+
+## 2. Finding them using SQL Queries
+If you want to see the details (like which dates or values are defined) using a script, you can query the system views:
+
+To see all Partition Functions:
+
+```SQL
+
+SELECT * FROM sys.partition_functions;
+```
+To see all Partition Schemes:
+
+```SQL
+
+SELECT * FROM sys.partition_schemes;
+```
+To see which Table is using which Partition: This is very helpful to verify that your "Finance Sink" table is correctly linked to the scheme:
+
+```SQL
+
+SELECT 
+    t.name AS TableName, 
+    ps.name AS PartitionScheme, 
+    pf.name AS PartitionFunction
+FROM sys.tables t
+JOIN sys.indexes i ON t.object_id = i.object_id
+JOIN sys.partition_schemes ps ON i.data_space_id = ps.data_space_id
+JOIN sys.partition_functions pf ON ps.function_id = pf.function_id
+WHERE t.name = 'Your_Table_Name'; -- Replace with your sink table name
+
+```
+## 3. Checking Partition Boundaries
+Since you need to delete/truncate specific data (like a specific month), you need to know which Partition Number corresponds to which date. Use this query:
+
+```SQL
+
+SELECT 
+    p.partition_number, 
+    p.rows, 
+    rv.value AS BoundaryValue
+FROM sys.partitions p
+JOIN sys.indexes i ON p.object_id = i.object_id AND p.index_id = i.index_id
+JOIN sys.partition_schemes ps ON i.data_space_id = ps.data_space_id
+JOIN sys.partition_range_values rv ON ps.function_id = rv.function_id AND p.partition_number = rv.boundary_id
+WHERE object_name(p.object_id) = 'Your_Table_Name';
+```
