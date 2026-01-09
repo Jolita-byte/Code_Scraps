@@ -522,3 +522,63 @@ JOIN sys.partition_schemes ps ON i.data_space_id = ps.data_space_id
 JOIN sys.partition_range_values rv ON ps.function_id = rv.function_id AND p.partition_number = rv.boundary_id
 WHERE object_name(p.object_id) = 'Your_Table_Name';
 ```
+
+# Dynamic partition identification
+To find the specific partition numbers used by your table (specifically the last two), you need to query `sys.partitions`. Since partition numbers are assigned sequentially, the "last" partitions correspond to the highest partition numbers.
+
+### The SQL Query
+
+This script identifies the two highest partition numbers currently containing (or reserved for) data in your `tracking_fact` table:
+
+```sql
+SELECT TOP 2
+    p.partition_number,
+    p.rows AS RowCount,
+    rv.value AS BoundaryValue
+FROM sys.partitions p
+JOIN sys.indexes i ON p.object_id = i.object_id AND p.index_id = i.index_id
+JOIN sys.partition_schemes ps ON i.data_space_id = ps.data_space_id
+JOIN sys.partition_functions pf ON ps.function_id = pf.function_id
+LEFT JOIN sys.partition_range_values rv 
+    ON pf.function_id = rv.function_id 
+    AND p.partition_number = (CASE WHEN pf.boundary_value_on_right = 1 THEN rv.boundary_id + 1 ELSE rv.boundary_id END)
+WHERE p.object_id = OBJECT_ID('Fleethand.tracking_fact')
+  AND i.type <= 1 -- 0: Heap, 1: Clustered (Only check the base data)
+ORDER BY p.partition_number DESC;
+
+```
+
+---
+
+### Understanding the Results
+
+1. **The "Last" Partition (Highest Number):**
+In a `RANGE RIGHT` function, the highest partition number is the **"catch-all"** bucket. It holds everything greater than or equal to your last defined date. In the query above, the `BoundaryValue` for this partition will often appear as `NULL` because it has no upper limit.
+2. **The Second to Last Partition:**
+This is usually the partition for your **most recent month** (e.g., January 2026).
+
+---
+
+### Why you need these for your "Update" logic
+
+When you want to perform a `SWITCH` or a `TRUNCATE`, you must provide the **exact partition number**.
+
+If you are using the **Staging Table** method we discussed, your logic would look like this:
+
+* **Partition N:** The empty future bucket.
+* **Partition N-1:** The bucket you just loaded with your latest Lithuanian fleet data.
+
+### Pro-Tip: Dynamic Partition Identification
+
+If you want to find the partition number for a **specific date** (so you don't have to guess which one is "last"), use the `$PARTITION` function:
+
+```sql
+DECLARE @TargetDate DATETIME2 = '2026-01-01';
+
+SELECT $PARTITION.pf_Monthly_datetime2(@TargetDate) AS TargetPartitionNumber;
+
+```
+
+*This is the safest way to ensure your `TRUNCATE` hits the correct month without accidentally wiping the wrong data.*
+
+**Would you like me to show you how to use this `$PARTITION` function inside an automated script to clear the current month's data?**
