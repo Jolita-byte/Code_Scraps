@@ -83,7 +83,7 @@ let
    #"Added Month Name Short" = Table.AddColumn(#"Added Month Name", "Month Name Short", each Text.Start([Month Name], 3), type text),
    #"Added Quarter Text" = Table.AddColumn(#"Added Month Name Short", "Quarter Text", each "Qtr " & Number.ToText([Quarter]), type text),
     #"Added Year Week" = Table.AddColumn(#"Added Quarter Text", "Year Week", each Number.ToText([Year]) & "-" & Number.ToText([Week]), type text),
-   #"Added Year Month" = Table.AddColumn(#"Added Year Week", "Year Month", each if [Month] < 10 then Number.ToText([Year]) & "-0" & Number.ToText([Month]) else Number.ToText([Year]) & "-" & Number.ToText([Month]), type text),
+#"Added Year Month" = Table.AddColumn(#"Added Year Week", "Year Month", each Date.ToText([Date], "yyyy-MM"), type text)
     #"Added Week Day Name LT" = Table.AddColumn(#"Added Year Month", "Week Day Name LT", each if [Week Day] = 0 then "Sekmadienis" else if [Week Day] = 1 then "Pirmadienis" else if [Week Day] = 2 then "Antradienis" else if [Week Day] = 3 then "Trečiadienis" else if [Week Day] = 4 then "Ketvirtadienis" else if [Week Day] = 5 then "Penktadiens" else if [Week Day] = 6 then "Šeštadienis" else null, type text),
    #"Added Month Name LT" = Table.AddColumn(#"Added Week Day Name LT", "Month Name LT", each if [Month] = 1 then "Sausis" else if [Month] = 2 then "Vasaris" else if [Month] = 3 then "Kovas" else if [Month] = 4 then "Balandis" else if [Month] = 5 then "Gegužė" else if [Month] = 6 then "Birželis" else if [Month] = 7 then "Liepa" else if [Month] = 8 then "Rugpjūtis" else if [Month] = 9 then "Rugsėjis" else if [Month] = 10 then "Spalis" else if [Month] = 11 then "Lapkritis" else "Gruodis", type text),
    #"Added Month Name Short LT" = Table.AddColumn(#"Added Month Name LT", "Month Name Short LT", each if [Month Name LT] = "Rugpjūtis" or [Month Name LT] = "Rugsėjis" then Text.Start([Month Name LT], 4) else Text.Start([Month Name LT], 3), type text),
@@ -126,7 +126,7 @@ in
    #"Changed Type"
 
 ```
-
+## kalendorius su laukų pavadinimais EN kalba
 ```
 let
    // MinDate = List.Min(List.Combine({Facts[DateKey], FactBudgets[DateKey]})),
