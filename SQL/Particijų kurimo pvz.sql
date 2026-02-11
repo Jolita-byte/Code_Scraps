@@ -108,3 +108,7 @@ END
 ---------------Pasitikriname iki kada yra likę duomenys
 select MAX(timestamp) from Fleethand.tracking_fact_partitions
 ------------------------
+---particijos rėžio naikinimas, netyčia sukūrus particijos rėžį
+
+ALTER PARTITION FUNCTION pf_Monthly_datetime2() 
+MERGE RANGE ('2026-02-11 00:00:00.0000000');
