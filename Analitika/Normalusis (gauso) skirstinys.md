@@ -36,6 +36,307 @@ IF(
 )
 ```
 
+# -----------------------------
+Analizuojant pagal Gauso (normalųjį) pasiskirstymą, svarbiausia ne pati „graži varpo forma“, o tai, ką ji pasako apie:
+
+* proceso stabilumą,
+* variaciją,
+* anomalijas,
+* prognozuojamumą,
+* segmentaciją.
+
+Tavo kainodaros/pardavimų atveju pagrindiniai akcentai būtų šie.
+
+---
+
+# 1. Vidurkis (μ)
+
+Tai centrinis taškas:
+
+\mu = \frac{1}{n}\sum_{i=1}^{n} x_i
+
+Verslo interpretacija:
+
+> aplink kokią kainą natūraliai koncentruojasi pardavimai
+
+Tavo atveju:
+
+* ~8.74 = „tipinė“ pardavimo kaina
+
+Klausimai:
+
+* ar ši kaina pelninga?
+* ar ji strategiškai norima?
+* ar ji sutampa su didžiausiu conversion?
+
+---
+
+# 2. Standartinis nuokrypis (σ)
+
+Svarbiausias stabilumo indikatorius.
+
+\sigma = \sqrt{\frac{1}{n-1}\sum_{i=1}^{n}(x_i-\mu)^2}
+
+Jis parodo:
+
+* kiek kainos išsimėčiusios
+* kiek procesas kontroliuojamas
+
+---
+
+## Mažas σ
+
+Reiškia:
+
+* kainodara nuosekli
+* procesas stabilus
+* mažai chaoso
+
+Galimai:
+
+* gera pricing governance
+* standartizuoti pasiūlymai
+
+---
+
+## Didelis σ
+
+Reiškia:
+
+* kainodara labai skirtinga
+* vadybininkai dirba nevienodai
+* daug išimčių
+
+Galimai:
+
+* discounting problema
+* segmentavimo trūkumas
+* skirtingi klientų tipai
+
+---
+
+# 3. 68–95–99.7 taisyklė
+
+Klasikinė Gauso interpretacija.
+
+Jei duomenys normalūs:
+
+* ~68% reikšmių yra:
+
+  ```text id="z9evui"
+  μ ± 1σ
+  ```
+
+* ~95%:
+
+  ```text id="vkx69w"
+  μ ± 2σ
+  ```
+
+* ~99.7%:
+
+  ```text id="jdf8ik"
+  μ ± 3σ
+  ```
+
+---
+
+## Praktinė reikšmė
+
+Jei:
+
+* μ = 8.74
+* σ = 2
+
+Tada:
+
+### Normalus diapazonas:
+
+```text id="2j1h0u"
+6.74 – 10.74
+```
+
+### Retos kainos:
+
+```text id="84z7jv"
+< 4.74 arba > 12.74
+```
+
+---
+
+# 4. Outlieriai (anomalijos)
+
+Svarbiausia praktinė nauda.
+
+Jei kaina:
+
+* labai toli nuo vidurkio
+* už ±2σ arba ±3σ
+
+tai gali reikšti:
+
+* klaidą
+* nestandartinį deal'ą
+* specialų klientą
+* pricing problemą
+
+---
+
+# 5. Simetriškumas
+
+Ideali Gauso kreivė:
+
+* simetriška
+* vienodas pasiskirstymas į abi puses
+
+Jei ne:
+
+* atsiranda skewness
+
+---
+
+## Dešininis skew
+
+Tavo grafike jo truputį yra.
+
+Reiškia:
+
+* dauguma kainų normalios
+* bet yra dalis labai aukštų kainų
+
+Versle tai dažna:
+
+* premium klientai
+* enterprise deals
+* išskirtiniai projektai
+
+---
+
+## Kairinis skew
+
+Reikštų:
+
+* daug discount'ų
+* agresyvus pigimas
+* galimas maržos spaudimas
+
+---
+
+# 6. Multimodalumas
+
+Labai svarbu.
+
+Jei histogramoje:
+
+* keli pikai
+
+tai reiškia:
+
+> egzistuoja skirtingi klientų ar produktų segmentai
+
+Pvz:
+
+* SMB klientai
+* Enterprise klientai
+
+Tokiu atveju:
+
+* viena Gauso kreivė tampa netinkama
+
+Reikia:
+
+* segmentuoti
+* modeliuoti atskirai
+
+---
+
+# 7. Histogram vs Gaussian mismatch
+
+Čia viena vertingiausių analizių.
+
+Jei:
+
+* realūs stulpeliai stipriai nesutampa su kreive
+
+tai reiškia:
+
+* procesas nėra „natūralus“
+* yra business rules
+* kainos dirbtinai formuojamos
+
+Pvz:
+
+* daug kainų ties 9.99
+* fixed pricing tiers
+* discount approval ribos
+
+---
+
+# 8. Prognozuojamumas
+
+Normalus pasiskirstymas leidžia:
+
+* prognozuoti tikėtinus intervalus
+* nustatyti control limits
+* vertinti riziką
+
+Pvz:
+
+> kokia tikimybė, kad kaina viršys 12?
+
+Tam naudojama:
+
+```DAX id="sffhmp"
+NORM.DIST(x, mean, std, TRUE())
+```
+
+(TRUE = cumulative)
+
+---
+
+# 9. Ar duomenys apskritai normalūs?
+
+Labai svarbu.
+
+Daug verslo duomenų:
+
+* nėra normalūs
+* turi skew
+* turi outlierius
+* turi sezoniką
+* turi segmentus
+
+Todėl Gauso kreivė dažnai:
+
+* ne „tiesa“
+* o benchmark/modelis
+
+---
+
+# 10. Svarbiausias praktinis klausimas
+
+Ne:
+
+> „ar kreivė graži?“
+
+O:
+
+> „kodėl realūs duomenys nukrypsta nuo normalumo?“
+
+Ten dažniausiai slypi:
+
+* verslo taisyklės
+* klientų elgsena
+* pricing strategija
+* vadybininkų sprendimai
+* proceso problemos
+* segmentacija
+
+Ir būtent tai vertingiausia analizėje.
+
+
+
+
 # ------------------------------------
 Sukurti Gauso (normaliojo pasiskirstymo) diagramą „Power BI“ aplinkoje galima keliais būdais. Kadangi standartinių vizualizacijų sąraše tokios diagramos nėra, geriausias ir lanksčiausias kelias – panaudoti **DAX formules** ir standartinę **stulpelinę/linijinę diagramą (Clustered Column / Line Chart)**.
 
