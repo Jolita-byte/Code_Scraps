@@ -37,6 +37,7 @@ IF(
 ```
 
 # -----------------------------
+# Prompt: kokie akcentai analizuojant pagal gauso pasiskirstymą?
 Analizuojant pagal Gauso (normalųjį) pasiskirstymą, svarbiausia ne pati „graži varpo forma“, o tai, ką ji pasako apie:
 
 * proceso stabilumą,
