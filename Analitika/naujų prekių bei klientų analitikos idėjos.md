@@ -18,9 +18,9 @@ Tai jau labai stiprus board-level analytics.
 
 ---
 
-# 🧭 1. Klausimai apie naujus klientus
+## 🧭 1. Klausimai apie naujus klientus
 
-## 🔷 Acquisition / Growth
+### 🔷 Acquisition / Growth
 
 * Kiek turime naujų klientų?
 * Kiek % pardavimų generuoja nauji klientai?
@@ -34,7 +34,7 @@ Tai jau labai stiprus board-level analytics.
 
 ---
 
-## 🔷 Retention / Quality
+### 🔷 Retention / Quality
 
 * Kiek naujų klientų grįžta antram pirkimui?
 * Po kiek laiko klientas grįžta?
@@ -47,7 +47,7 @@ Tai jau labai stiprus board-level analytics.
 
 ---
 
-## 🔷 Customer mix
+### 🔷 Customer mix
 
 * Ar nauji klientai keičia pardavimų struktūrą?
 * Kokias kategorijas renkasi nauji klientai?
@@ -55,9 +55,9 @@ Tai jau labai stiprus board-level analytics.
 
 ---
 
-# 🧱 Kaip techniškai išpildyti „naują klientą“
+## 🧱 Kaip techniškai išpildyti „naują klientą“
 
-## 1. Surasti pirmą pirkimą
+### 1. Surasti pirmą pirkimą
 
 ```DAX id="g2p8vk"
 First Purchase Date =
@@ -69,7 +69,7 @@ CALCULATE(
 
 ---
 
-## 2. Nustatyti ar klientas naujas
+### 2. Nustatyti ar klientas naujas
 
 ```DAX id="v9x4bn"
 New Customer =
@@ -82,7 +82,7 @@ IF(
 
 ---
 
-## 3. Naujų klientų skaičius
+### 3. Naujų klientų skaičius
 
 ```DAX id="h6q1tr"
 New Customers =
@@ -94,18 +94,18 @@ CALCULATE(
 
 ---
 
-# 📊 Kaip vizualizuoti
+## 📊 Kaip vizualizuoti
 
-## Geriausi vizualai:
+### Geriausi vizualai:
 
-### 🟩 KPI
+#### 🟩 KPI
 
 * New Customers
 * % Revenue from New Customers
 
 ---
 
-### 📈 Trend
+#### 📈 Trend
 
 * New customers by month
 
@@ -115,7 +115,7 @@ CALCULATE(
 
 ---
 
-### ⚖️ Scatter
+#### ⚖️ Scatter
 
 * X = Revenue
 * Y = Margin
@@ -127,7 +127,7 @@ CALCULATE(
 
 ---
 
-### 🔥 Cohort / retention heatmap
+#### 🔥 Cohort / retention heatmap
 
 * mėnuo vs grįžimo %
 
@@ -135,13 +135,13 @@ CALCULATE(
 
 ---
 
-# 🧭 2. Klausimai apie naujas prekes (SKU)
+## 🧭 2. Klausimai apie naujas prekes (SKU)
 
 Čia labai daug potencialo.
 
 ---
 
-## 🔷 Growth drivers
+### 🔷 Growth drivers
 
 * Kiek pardavimų generuoja naujos prekės?
 * Ar naujos prekės prisideda prie augimo?
@@ -153,7 +153,7 @@ CALCULATE(
 
 ---
 
-## 🔷 Portfolio efficiency
+### 🔷 Portfolio efficiency
 
 * Ar naujos prekės kanibalizuoja senas?
 * Ar daugiau SKU → daugiau pelno?
@@ -165,7 +165,7 @@ CALCULATE(
 
 ---
 
-## 🔷 Product lifecycle
+### 🔷 Product lifecycle
 
 * Kaip greitai naujos prekės pasiekia piką?
 * Kada pradeda kristi?
@@ -173,9 +173,9 @@ CALCULATE(
 
 ---
 
-# 🧱 Kaip nustatyti naują prekę
+## 🧱 Kaip nustatyti naują prekę
 
-## 1. Pirmas pardavimo momentas
+### 1. Pirmas pardavimo momentas
 
 ```DAX id="d4m7qy"
 First SKU Sale =
@@ -187,7 +187,7 @@ CALCULATE(
 
 ---
 
-## 2. Nauja prekė
+### 2. Nauja prekė
 
 ```DAX id="t8n2wc"
 New SKU =
@@ -200,22 +200,22 @@ IF(
 
 ---
 
-# 📊 Vizualai naujoms prekėms
+## 📊 Vizualai naujoms prekėms
 
-## 🟩 KPI
+### 🟩 KPI
 
 * Revenue from new SKUs
 * Profit from new SKUs
 
 ---
 
-## 📈 Trend
+### 📈 Trend
 
 * New SKU contribution over time
 
 ---
 
-## 🧨 Waterfall
+### 🧨 Waterfall
 
 * kiek augimo atėjo iš:
 
@@ -224,7 +224,7 @@ IF(
 
 ---
 
-## ⚖️ Scatter
+### ⚖️ Scatter
 
 * X = Sales
 * Y = Margin
@@ -234,13 +234,13 @@ IF(
 
 ---
 
-# 🧠 Galingiausi klausimai (board-level)
+## 🧠 Galingiausi klausimai (board-level)
 
 Šitie daro wow efektą:
 
 ---
 
-## Apie klientus
+### Apie klientus
 
 * Ar augimas ateina iš naujų ar esamų klientų?
 * Ar nauji klientai tampa lojaliais?
@@ -248,7 +248,7 @@ IF(
 
 ---
 
-## Apie prekes
+### Apie prekes
 
 * Ar naujos prekės generuoja papildomą augimą?
 * Ar naujų SKU daugėjimas didina ar mažina maržą?
@@ -256,27 +256,27 @@ IF(
 
 ---
 
-# 🎯 Storytelling logika
+## 🎯 Storytelling logika
 
-## 1.
+### 1.
 
 > „Augimas ateina iš naujų klientų / neateina“
 
-## 2.
+### 2.
 
 > „Naujų klientų kokybė yra aukšta / žema“
 
-## 3.
+### 3.
 
 > „Naujos prekės generuoja / negeneruoja papildomą pelną“
 
-## 4.
+### 4.
 
 > „Portfelio plėtra yra efektyvi / neefektyvi“
 
 ---
 
-# 🚀 Jei nori next level
+## 🚀 Jei nori next level
 
 Galiu tau:
 
