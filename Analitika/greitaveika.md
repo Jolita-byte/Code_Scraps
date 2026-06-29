@@ -104,6 +104,42 @@ Sprendimas: Jei esate 100% tikra, kad visi faktų lentelės ID turi savo porą d
 
 Efektas: „Power BI“ pakeis fone generuojamą SQL kodą iš LEFT JOIN į INNER JOIN. Duomenų bazės (SQL Server / Fabric) INNER JOIN užklausas vykdo iki kelių kartų greičiau, nes joms nereikia ieškoti tuščių (Null) palikimų fone.
 
+### 13. Hibridiniu (saugyklos režimų) modeliu arba Composite modeliu.
+Tai yra viena stipriausių praktikų, kai dirbama su milžiniškais duomenų kiekiais, nes ji sujungia dviejų pasaulių geriausias savybes: Import greitį ir DirectQuery realaus laiko (arba didelės apimties) privalumus.
+
+Štai kaip tiksliai ši kombinacija padeda pagreitinti tavo ataskaitų veikimą:
+
+🚀 1. Kodėl „Dim“ lentelės Import režimu duoda milžinišką postūmį?
+Dim (dimensijų) lentelės (pvz., tavo Dim_Hierarchija, Dim_Padaliniai, Prekės, Klientai, Kalendorius) yra naudojamos vizualų ašyse, eilutėse, stulpeliuose ir, svarbiausia, filtruose (Slicers).
+
+Akimirksniu užsikraunantys filtrai: Kai pirkėjas išskleidžia datos ar padalinio filtrą, Power BI nereikia siųsti užklausos į SQL serverį ar debesį. Viskas vyksta kompiuterio operatyviojoje atmintyje (RAM). Filtrai reaguoja akimirksniu, be jokio „sukimosi“.
+
+Žaibiškas filtravimo konteksto perdavimas: Power BI vidinis variklis (VertiPaq) labai greitai apdoroja tekstines dimensijas, kai jos yra atmintyje.
+
+⛓️ 2. Kodėl „Fact“ lentelė DirectQuery režimu padeda greitaveikai?
+Fact (faktų) lentelės (pvz., Pardavimai, Likučiai, Gamyba) dažniausiai yra milžiniškos – jose gali būti milijonai ar net milijardai eilučių.
+
+Ataskaita neapkrauna atminties: Jei šias eilutes importuotum į modelį, tavo failas taptų „sunkus“, o kiekvienas duomenų atnaujinimas (Refresh) truktų labai ilgai. Naudojant DirectQuery, Power BI neatsiunčia visų milijonų eilučių į tavo kompiuterį – jos lieka serveryje.
+
+Serveris atlieka sunkų darbą: Kai matricoje skaičiuoji [Faktinė Pardavimų Suma], Power BI išverčia tavo DAX į SQL užklausą ir išsiunčia ją į serverį. Serveris suagreguoja (susumuoja) duomenis ir grąžina atgal tik vieną galutinį skaičių (pvz., 42K), o ne visas eilučių detales.
+
+
+⚠️ Didžiausia rizika greitaveikai: „Cross-source“ užklausos
+Nors teoriškai tai skamba idealiai, praktikoje šis režimas gali pradėti strigti, jei nepadarysi vieno esminio žingsnio.
+
+Kai tu sujungti Import lentelę su DirectQuery lentele, Power BI, norėdamas parodyti rezultatą, privalo nusiųsti visus tavo Import lentelės raktus į serverį, kad ten įvyktų filtravimas. Jei tavo dimensijų lentelė yra didelė, Power BI fone sugeneruoja milžinišką SQL užklausą su tūkstančiais WHERE sąlygų. Tai gali labai sulėtinti DirectQuery atsaką.
+
+💡 Kaip tai išspręsti? (Dual Mode magija)
+Kad hibridinis modelis veiktų maksimaliu greičiu, visoms tavo Dim lentelėms reikėtų nustatyti ne šiaip Import, o Dual (Dvigubą) saugyklos režimą.
+
+Kaip tai veikia:
+
+Jei vizuale naudoji tik dimensiją (pvz., kuri filtrą iš Dim_Padaliniai), Power BI elgiasi su ja kaip su Import – viskas veikia žaibiškai iš atminties.
+
+Jei dimensiją sujungi su faktų lentele (pvz., skaičiuoji pardavimus pagal padalinius), Power BI fone laikinai paverčia tą dimensiją į DirectQuery ir serveryje atlieka tvarkingą, natūralų JOIN veiksmą. SQL serveriui tai daryti yra šimtą kartų lengviau, nei apdoroti tūkstantines išorines užklausas.
+
+Jei turi labai didelę faktų lentelę, kurios nenori importuoti, nustatyk Fact ➡️ DirectQuery, o Dim ➡️ Dual. Tai yra galingiausia Power BI optimizavimo konfigūracija.
+
 
 
 
